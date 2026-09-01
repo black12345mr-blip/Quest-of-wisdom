@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quest of Wisdom - v2.0 Profile Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        :root {
+            --pixel-size: 4px;
+            --main-bg: #1a1a2e;
+            --card-bg: #16213e;
+            --accent-yellow: #f1c40f;
+            --accent-green: #2ecc71;
+            --accent-red: #e74c3c;
+            --accent-blue: #3498db;
+            --accent-purple: #9b59b6;
+            --font-family: 'Press Start 2P', cursive;
+        }
+
+        * { box-sizing: border-box; user-select: none; }
+
+        html, body {
+            margin: 0; padding: 0; 
+            width: 100%; height: 100%;
+            background-color: #0f0f1a; color: #fff;
+            font-family: var(--font-family); 
+            image-rendering: pixelated;
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 100vw; 
+            height: 100vh; 
+            background-color: var(--main-bg);
+            border: var(--pixel-size) solid #fff; 
+            position: relative;
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column;
+        }
+
+        .screen {
+            width: 100%; height: 100%; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; position: absolute;
+            top: 0; left: 0; z-index: 2; padding: 15px;
+        }
+        .hidden { display: none !important; }
+
+        /* Title Screen */
+        #title-screen { background: linear-gradient(180deg, #70a1ff 0%, #eccc68 75%, #7bed9f 100%); }
+        .stardew-board {
+            background: #8c5523; border: 6px solid #4a2c11;
+            box-shadow: inset 0 0 0 4px #b87333, 0 10px 0 rgba(0,0,0,0.3);
+            padding: 20px 30px; border-radius: 8px; text-align: center; margin-bottom: 15px;
+            max-width: 90%;
+        }
+        #title-text {
+            font-size: 18px; color: #f1c40f;
+            text-shadow: 3px 3px 0px #b87333, 6px 6px 0px #4a2c11; margin: 0 0 10px 0;
+        }
+        .stardew-btn {
+            background-color: #b8e994; border: 4px solid #38ada9; border-radius: 8px;
+            color: #079992; font-family: var(--font-family); font-size: 9px; font-weight: bold;
+            padding: 10px 14px; margin: 4px 0; cursor: pointer;
+            box-shadow: 0px 4px 0px #079992; transition: all 0.1s ease;
+        }
+        .stardew-btn:hover { transform: translateY(-2px); background-color: #78e08f; }
+        .stardew-btn:active { transform: translateY(2px); box-shadow: 0px 1px 0px #079992; }
+
+        /* Class Selection */
+        #class-selection-screen { background-color: rgba(26, 26, 46, 0.95); }
+        #class-container { display: flex; gap: 15px; justify-content: center; margin-top: 15px; flex-wrap: wrap; }
+        .class-card {
+            background: var(--card-bg); border: var(--pixel-size) solid #fff;
+            width: 220px; padding: 15px; text-align: center; cursor: pointer;
+        }
+        .class-card.selected { border-color: var(--accent-green); background: #1f3a52; }
+        .class-icon { width: 50px; height: 50px; margin: 0 auto 10px auto; border-radius: 4px; display: flex; justify-content: center; align-items: center; font-size: 24px; }
+        .icon-warrior { background: var(--accent-red); }
+        .icon-mage { background: var(--accent-blue); }
+        .icon-scholar { background: var(--accent-yellow); }
+
+        /* Main Game Layout */
+        #main-game-screen { justify-content: flex-start; padding: 0; background: var(--main-bg); position: relative; }
+        
+        #status-bar {
+            width: 100%; 
+            min-height: 80px; 
+            background-color: #0f0f1a;
+            border-bottom: var(--pixel-size) solid #fff; 
+            display: flex;
+            align-items: center; 
+            padding: 10px 15px; 
+            gap: 15px;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+        
+        /* Avatar & Profile */
+        .player-avatar-box {
+            width: 55px; height: 55px; border: 2px solid #fff;
+            position: relative; overflow: hidden; background: #222; flex-shrink: 0;
+            display: flex; justify-content: center; align-items: center; border-radius: 6px;
+        }
+        .player-avatar-img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .stats-details { flex-grow: 1; min-width: 0; }
+        .stats-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 9px; flex-wrap: wrap; gap: 5px; }
+        .progress-bar-bg { width: 100%; height: 14px; background-color: #333; border: 2px solid #fff; border-radius: 4px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background-color: var(--accent-green); width: 0%; transition: width 0.3s; }
+
+        #game-nav { 
+            display: flex; 
+            width: 100%; 
+            background-color: #16213e; 
+            border-bottom: var(--pixel-size) solid #fff; 
+            overflow-x: auto; 
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .nav-tab { 
+            flex: 1; 
+            min-width: 90px; 
+            padding: 12px 6px; 
+            background: none; 
+            border: none; 
+            color: #fff; 
+            font-family: var(--font-family); 
+            font-size: 8px; 
+            cursor: pointer; 
+            border-right: 1px solid #333; 
+        }
+        .nav-tab.active { background-color: var(--accent-yellow); color: #000; font-weight: bold; }
+        .nav-tab.exit-tab { background-color: #e74c3c; color: #fff; }
+
+        #content-area { flex-grow: 1; width: 100%; padding: 15px; overflow-y: auto; box-sizing: border-box; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Elements & Cards */
+        .quest-sub-nav { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+        .sub-btn { background: #0f0f1a; border: 2px solid #fff; color: #fff; padding: 8px 12px; font-family: var(--font-family); font-size: 8px; cursor: pointer; }
+        .sub-btn.active { background: var(--accent-blue); }
+
+        .item-card {
+            background: var(--card-bg); border: 2px solid #fff; padding: 12px;
+            margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; border-radius: 6px;
+        }
+        .item-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .item-title { font-size: 9px; color: var(--accent-yellow); line-height: 1.4; }
+
+        .rank-badge { display: inline-block; padding: 3px 6px; border-radius: 4px; font-size: 8px; font-weight: bold; margin-right: 5px; }
+        .rank-E { background: #7f8c8d; color: #fff; }
+        .rank-C { background: #3498db; color: #fff; }
+        .rank-A { background: #9b59b6; color: #fff; }
+        .rank-S { background: #e74c3c; color: #fff; }
+
+        .uploaded-img-preview { max-width: 100%; max-height: 150px; border: 2px solid var(--accent-yellow); margin-top: 5px; object-fit: contain; border-radius: 4px; }
+        .add-quest-box { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
+        .pixel-input, .pixel-select { background: #0f0f1a; border: 2px solid #fff; color: #fff; font-family: var(--font-family); padding: 8px; font-size: 8px; border-radius: 4px; }
+
+        .quiz-option { width: 100%; text-align: left; margin: 6px 0; font-size: 8px; padding: 12px; background: #2c3e50; border: 2px solid #fff; color: #fff; cursor: pointer; border-radius: 4px; line-height: 1.4; }
+        .quiz-option.selected { border-color: var(--accent-yellow); background-color: #34495e; }
+        .quiz-controls { display: flex; justify-content: space-between; margin-top: 15px; }
+
+        /* Tree & Boss Elements */
+        .boss-hp-bg { width: 100%; height: 20px; background-color: #444; border: 2px solid #fff; margin: 8px 0; border-radius: 4px; overflow: hidden; }
+        .boss-hp-fill { height: 100%; background-color: var(--accent-red); width: 100%; transition: width 0.3s; }
+        .tree-stage { font-size: 60px; text-align: center; margin: 15px 0; }
+
+        /* Profile Editor System */
+        .profile-edit-box { display: flex; flex-direction: column; gap: 10px; max-width: 400px; margin: 0 auto; }
+        .preset-grid { display: flex; gap: 10px; margin: 8px 0; justify-content: center; flex-wrap: wrap; }
+        .preset-item { width: 45px; height: 45px; border: 2px solid #fff; cursor: pointer; font-size: 20px; display: flex; justify-content: center; align-items: center; background: #0f0f1a; border-radius: 4px; }
+        .preset-item:hover { border-color: var(--accent-yellow); }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- 1. Title Screen -->
+        <div id="title-screen" class="screen">
+            <div class="stardew-board">
+                <h1 id="title-text">QUEST OF WISDOM</h1>
+                <p style="font-size: 8px; color: #ffeaa7; margin: 0;">👑 v2.0 - PROFILE EDITION 👑</p>
+            </div>
+            
+            <button class="stardew-btn" style="width: 220px;" onclick="sound.playBtn(); showScreen('class-selection-screen')">เริ่มเกมใหม่</button>
+            <button class="stardew-btn" style="width: 220px; background-color: #74b9ff; border-color: #0984e3; color: #2c3e50;" onclick="sound.playBtn(); loadSavedGame()">เล่นต่อ (Load Game)</button>
+            <button class="stardew-btn" style="width: 220px; background-color: #ff7675; border-color: #d63031; color: #fff; margin-top: 10px;" onclick="sound.playBtn(); resetGame()">ลบเซฟ / เริ่มใหม่ (Reset)</button>
+        </div>
+
+        <!-- 2. Class Selection Screen -->
+        <div id="class-selection-screen" class="screen hidden">
+            <h2 style="font-size: 11px; color: var(--accent-yellow); margin-bottom: 10px;">-- เลือกคลาสอาชีพของคุณ --</h2>
+            
+            <div id="class-container">
+                <div class="class-card" onclick="selectClass('warrior', this)">
+                    <div class="class-icon icon-warrior">⚔️</div>
+                    <div style="font-size: 9px; color: #fff; margin-bottom: 5px;">นักรบดารา</div>
+                    <div style="font-size: 7px; color: #bdc3c7; line-height: 1.4;">เน้นลุยงานหนัก เชี่ยวชาญฟิสิกส์และดาราศาสตร์</div>
+                    <div style="font-size: 7px; color: var(--accent-green); margin-top: 8px;">★ สกิล: รับ EXP จากเควสต์เพิ่มขึ้น</div>
+                </div>
+
+                <div class="class-card" onclick="selectClass('mage', this)">
+                    <div class="class-icon icon-mage">🪄</div>
+                    <div style="font-size: 9px; color: #fff; margin-bottom: 5px;">จอมเวทธาตุ</div>
+                    <div style="font-size: 7px; color: #bdc3c7; line-height: 1.4;">รอบรู้ปฏิกิริยา ปราดเปรื่องเคมีและชีววิทยา</div>
+                    <div style="font-size: 7px; color: var(--accent-green); margin-top: 8px;">★ สกิล: เร่งเวลาทำ Quiz +15 วินาที</div>
+                </div>
+
+                <div class="class-card" onclick="selectClass('scholar', this)">
+                    <div class="class-icon icon-scholar">📐</div>
+                    <div style="font-size: 9px; color: #fff; margin-bottom: 5px;">ปราชญ์คำนวณ</div>
+                    <div style="font-size: 7px; color: #bdc3c7; line-height: 1.4;">วิเคราะห์แม่นยำ เชี่ยวชาญคณิตศาสตร์</div>
+                    <div style="font-size: 7px; color: var(--accent-green); margin-top: 8px;">★ สกิล: คำนวณรับ Gold โบนัสพิเศษ</div>
+                </div>
+            </div>
+
+            <button id="start-game-btn" class="stardew-btn hidden" style="margin-top: 20px; width: 200px;" onclick="startGame()">เข้าสู่โลกเกม</button>
+            <button class="stardew-btn" style="margin-top: 8px; font-size: 8px; background-color: #ff7675; border-color: #d63031; color: #fff;" onclick="showScreen('title-screen')">ย้อนกลับ</button>
+        </div>
+
+        <!-- 3. Main Game Screen -->
+        <div id="main-game-screen" class="screen hidden">
+            <div id="status-bar">
+                <div class="player-avatar-box">
+                    <img id="status-avatar-img" class="player-avatar-img" src="" alt="Avatar" style="display:none;">
+                    <span id="status-avatar-icon" style="font-size: 26px;">⚔️</span>
+                </div>
+                <div class="stats-details">
+                    <div class="stats-row">
+                        <span id="player-name" style="color: var(--accent-yellow); font-weight: bold;">ผู้กล้า (Lv. 1)</span>
+                        <span>Gold: <span id="player-gold" style="color: var(--accent-yellow);">0</span> 🪙</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>EXP: <span id="player-exp">0</span>/<span id="player-next-exp">100</span></span>
+                        <span id="player-pet-info" style="color: var(--accent-purple);">สัตว์เลี้ยง: -</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div id="exp-bar-fill" class="progress-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="game-nav">
+                <button class="nav-tab active" onclick="switchTab('quests-tab', this)">📜 เควสต์</button>
+                <button class="nav-tab" onclick="switchTab('quiz-tab', this)">🧠 แบบทดสอบ</button>
+                <button class="nav-tab" onclick="switchTab('profile-tab', this)">👤 โปรไฟล์</button>
+                <button class="nav-tab" onclick="switchTab('timer-tab', this)">⏱️ จับเวลา</button>
+                <button class="nav-tab" onclick="switchTab('boss-tab', this)">🐲 สู้บอส</button>
+                <button class="nav-tab" onclick="switchTab('tree-tab', this)">🌳 ต้นไม้</button>
+                <button class="nav-tab" onclick="switchTab('achieve-tab', this)">🏆 ถ้วยรางวัล</button>
+                <button class="nav-tab" onclick="switchTab('shop-tab', this)">🛒 ร้านค้า</button>
+                <button class="nav-tab exit-tab" onclick="goToTitleScreen()">🔙 ไตเติ้ล</button>
+            </div>
+
+            <div id="content-area">
+                <!-- Quests Tab -->
+                <div id="quests-tab" class="tab-content active">
+                    <div class="quest-sub-nav">
+                        <button id="btn-sub-available" class="sub-btn active" onclick="switchQuestSubTab('available')">กระดานเควสต์</button>
+                        <button id="btn-sub-myquests" class="sub-btn" onclick="switchQuestSubTab('myquests')">เควสต์ของฉัน (<span id="my-quest-count">0</span>)</button>
+                        <button class="sub-btn" style="background: var(--accent-purple);" onclick="claimDailyReward()">📅 เช็กอินรายวัน</button>
+                    </div>
+
+                    <div class="add-quest-box">
+                        <input type="text" id="quest-input" class="pixel-input" style="flex-grow: 1; min-width: 150px;" placeholder="เพิ่มภารกิจใหม่...">
+                        <select id="quest-rank-select" class="pixel-select">
+                            <option value="E">Rank E (ง่าย)</option>
+                            <option value="C" selected>Rank C (ปานกลาง)</option>
+                            <option value="A">Rank A (ยาก)</option>
+                            <option value="S">Rank S (ท้าทายมาก)</option>
+                        </select>
+                        <button class="stardew-btn" style="margin:0; padding: 8px 12px;" onclick="addCustomQuest()">+ เพิ่มเควสต์</button>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <button class="stardew-btn" style="background-color: #9b59b6; border-color: #8e44ad; color: #fff; font-size: 8px; width: 100%; margin:0;" onclick="getRandomQuest()">🎲 สุ่มเควสต์ประจำวัน (Daily Gacha)</button>
+                    </div>
+
+                    <div id="available-quests-list"></div>
+                    <div id="my-quests-list" class="hidden"></div>
+                </div>
+
+                <!-- Profile Editor Tab -->
+                <div id="profile-tab" class="tab-content">
+                    <div class="item-card">
+                        <h3 style="font-size: 10px; color: var(--accent-yellow); text-align: center;">👤 ตั้งค่าโปรไฟล์อวตารผู้กล้า</h3>
+                        
+                        <div class="profile-edit-box">
+                            <div style="text-align: center;">
+                                <div class="player-avatar-box" style="width:80px; height:80px; margin: 0 auto 10px auto;">
+                                    <img id="edit-avatar-preview" class="player-avatar-img" src="" alt="Avatar" style="display:none;">
+                                    <span id="edit-avatar-icon-preview" style="font-size: 36px;">⚔️</span>
+                                </div>
+                                <label class="stardew-btn" style="display: inline-block; cursor: pointer; background: var(--accent-blue); color:#fff; border-color: #2980b9;">📷 อัปโหลดรูปอวตารเอง
+                                    <input type="file" id="avatar-file-input" accept="image/*" style="display:none;" onchange="uploadCustomAvatar(event)">
+                                </label>
+                            </div>
+
+                            <div style="font-size: 8px; color:#bdc3c7; text-align:center;">หรือเลือกไอคอนสำเร็จรูป:</div>
+                            <div class="preset-grid">
+                                <div class="preset-item" onclick="setPresetAvatarIcon('⚔️')">⚔️</div>
+                                <div class="preset-item" onclick="setPresetAvatarIcon('🪄')">🪄</div>
+                                <div class="preset-item" onclick="setPresetAvatarIcon('📐')">📐</div>
+                                <div class="preset-item" onclick="setPresetAvatarIcon('🧙‍♂️')">🧙‍♂️</div>
+                                <div class="preset-item" onclick="setPresetAvatarIcon('🐉')">🐉</div>
+                            </div>
+
+                            <label style="font-size: 8px; color: var(--accent-yellow);">ชื่อผู้เล่น:</label>
+                            <input type="text" id="edit-player-name" class="pixel-input" placeholder="ใส่ชื่อตัวละครของคุณ...">
+
+                            <label style="font-size: 8px; color: var(--accent-yellow);">คติประจำใจ / Bio:</label>
+                            <input type="text" id="edit-player-bio" class="pixel-input" placeholder="พิมพ์คติประจำใจสั้นๆ...">
+
+                            <button class="stardew-btn" style="background: var(--accent-green); color:#fff; border-color: #27ae60; margin-top:10px;" onclick="saveProfileChanges()">💾 บันทึกข้อมูลโปรไฟล์</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Tab -->
+                <div id="quiz-tab" class="tab-content">
+                    <div id="quiz-select-view">
+                        <p style="font-size: 9px; margin-bottom: 12px;">เลือกหมวดวิชาเพื่อเริ่มการทดสอบ:</p>
+                        <button class="quiz-option" onclick="startQuiz('astro')">🌌 ดาราศาสตร์ (Astronomy) [5 ข้อ]</button>
+                        <button class="quiz-option" onclick="startQuiz('math')">📐 คณิตศาสตร์ (Math)</button>
+                        <button class="quiz-option" onclick="startQuiz('chem')">🧪 เคมี (Chemistry)</button>
+                        <button class="quiz-option" onclick="startQuiz('phys')">⚡ ฟิสิกส์ (Physics)</button>
+                        <button class="quiz-option" onclick="startQuiz('bio')">🌿 ชีววิทยา (Biology)</button>
+                    </div>
+
+                    <div id="quiz-play-view" class="hidden">
+                        <div style="display: flex; justify-content: space-between; font-size: 8px; color: var(--accent-yellow); margin-bottom: 8px;">
+                            <span id="quiz-subject-title">SUBJECT</span>
+                            <span>⏱️ เวลา: <span id="quiz-timer" style="color: var(--accent-red);">60</span>s</span>
+                            <span id="quiz-progress">1/5</span>
+                        </div>
+                        <div class="item-card" style="flex-direction: column; align-items: flex-start;">
+                            <p id="quiz-question-text" style="font-size: 8px; line-height: 1.5; margin: 8px 0;"></p>
+                        </div>
+                        <div id="quiz-options-container"></div>
+                        
+                        <div class="quiz-controls">
+                            <button class="stardew-btn" style="padding: 8px 12px; background-color: #ff7675; border-color: #d63031; color: #fff;" onclick="exitQuiz()">🚪 ออก</button>
+                            <div>
+                                <button id="btn-quiz-prev" class="stardew-btn" style="padding: 8px 12px; background-color: #74b9ff; border-color: #0984e3; color: #fff;" onclick="prevQuestion()">⬅️ ย้อนกลับ</button>
+                                <button id="btn-quiz-next" class="stardew-btn" style="padding: 8px 12px;" onclick="nextQuestion()">ถัดไป ➡️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pomodoro Timer Tab -->
+                <div id="timer-tab" class="tab-content">
+                    <div class="item-card" style="text-align: center; padding: 20px;">
+                        <h3 style="font-size: 11px; color: var(--accent-yellow);">⏱️ ระบบจับเวลาอ่านหนังสือ (Pomodoro)</h3>
+                        <p style="font-size: 8px; color: #bdc3c7; line-height: 1.4;">ตั้งใจอ่านหนังสือ/โฟกัสงาน 25 นาที รับทันที +100 EXP และ +50 Gold!</p>
+                        <div id="pomo-display" style="font-size: 36px; margin: 20px 0; color: var(--accent-green);">25:00</div>
+                        <div>
+                            <button class="stardew-btn" style="width: 120px;" onclick="startPomodoro()">▶️ เริ่มจับเวลา</button>
+                            <button class="stardew-btn" style="width: 120px; background-color: #ff7675; border-color: #d63031; color: #fff;" onclick="stopPomodoro()">⏹️ ยกเลิก</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Boss Dungeon Tab -->
+                <div id="boss-tab" class="tab-content">
+                    <div class="item-card" style="text-align: center; padding: 15px;">
+                        <h3 style="font-size: 11px; color: var(--accent-red);">🐲 ดันเจี้ยนบอส: มังกรแห่งความเกียจคร้าน</h3>
+                        <p style="font-size: 8px; color: #bdc3c7; line-height: 1.4;">ตอบคำถาม Quiz ให้ถูกต้องเพื่อโจมตีบอส! (ตอบถูก = -100 HP)</p>
+                        
+                        <div class="boss-hp-bg">
+                            <div id="boss-hp-fill" class="boss-hp-fill"></div>
+                        </div>
+                        <div style="font-size: 8px; margin-bottom: 12px;">Boss HP: <span id="boss-hp-text">500</span>/500</div>
+                        
+                        <button class="stardew-btn" style="background-color: #e74c3c; border-color: #c0392b; color: #fff; width: 200px;" onclick="attackBoss()">⚔️ เริ่มโจมตีบอส!</button>
+                    </div>
+                </div>
+
+                <!-- Tree of Wisdom Tab -->
+                <div id="tree-tab" class="tab-content">
+                    <div class="item-card" style="text-align: center; padding: 15px;">
+                        <h3 style="font-size: 11px; color: var(--accent-green);">🌳 ต้นไม้แห่งปัญญา (Tree of Wisdom)</h3>
+                        <p style="font-size: 8px; color: #bdc3c7; line-height: 1.4;">รดน้ำเพื่อเปิดให้ต้นไม้เติบโตและเก็บเกี่ยวโบนัสใหญ่!</p>
+                        
+                        <div id="tree-icon" class="tree-stage">🌱</div>
+                        <div style="font-size: 8px; margin-bottom: 10px;">ระดับการเติบโต: <span id="tree-level">1</span>/5</div>
+                        
+                        <button class="stardew-btn" style="width: 180px;" onclick="waterTree()">💧 รดน้ำต้นไม้ (จ่าย 20 Gold)</button>
+                    </div>
+                </div>
+
+                <!-- Achievements Tab -->
+                <div id="achieve-tab" class="tab-content">
+                    <h3 style="font-size: 10px; color: var(--accent-yellow); margin-bottom: 10px;">🏆 ถ้วยรางวัลความสำเร็จ:</h3>
+                    <div id="achievements-list"></div>
+                </div>
+
+                <!-- Shop & Pet Tab -->
+                <div id="shop-tab" class="tab-content">
+                    <p style="font-size: 8px; color: #bdc3c7; margin-bottom: 10px;">🐾 ร้านค้าและสัตว์เลี้ยงผู้ช่วย:</p>
+                    <div id="shop-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sound System
+        const sound = {
+            ctx: null,
+            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+            playTone(freq, type, duration) {
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type; osc.frequency.value = freq;
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start();
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+                osc.stop(this.ctx.currentTime + duration);
+            },
+            playBtn() { this.playTone(400, 'square', 0.05); },
+            playSuccess() {
+                this.playTone(523.25, 'triangle', 0.1);
+                setTimeout(() => this.playTone(659.25, 'triangle', 0.1), 100);
+                setTimeout(() => this.playTone(783.99, 'triangle', 0.2), 200);
+            },
+            playCritical() {
+                this.playTone(523.25, 'square', 0.1);
+                setTimeout(() => this.playTone(659.25, 'square', 0.1), 80);
+                setTimeout(() => this.playTone(783.99, 'square', 0.1), 160);
+                setTimeout(() => this.playTone(1046.50, 'square', 0.3), 240);
+            },
+            playWrong() {
+                this.playTone(200, 'sawtooth', 0.15);
+                setTimeout(() => this.playTone(150, 'sawtooth', 0.2), 150);
+            },
+            playLevelUp() {
+                [440, 554.37, 659.25, 880].forEach((freq, idx) => {
+                    setTimeout(() => this.playTone(freq, 'square', 0.15), idx * 100);
+                });
+            }
+        };
+
+        let player = {
+            name: 'ผู้กล้า',
+            bio: 'ผู้พิชิตแห่งโลกปัญญา',
+            customAvatarImg: null,
+            avatarIcon: '⚔️',
+            level: 1, exp: 0, nextExp: 100, gold: 50,
+            classKey: 'warrior', className: 'นักรบดารา',
+            activePet: null, questsCompleted: 0,
+            treeLevel: 1, bossHp: 500
+        };
+
+        const rankMultipliers = {
+            E: { exp: 30, gold: 15 },
+            C: { exp: 60, gold: 30 },
+            A: { exp: 120, gold: 60 },
+            S: { exp: 250, gold: 125 }
+        };
+
+        const randomQuestPool = [
+            { title: "ดื่มน้ำเปล่า 2 แก้วใหญ่", rank: "E" },
+            { title: "ลุกขึ้นยืดสายตา/ยืดกล้ามเนื้อ 5 นาที", rank: "E" },
+            { title: "อ่านบทเรียนทบทวน 20 นาที", rank: "C" },
+            { title: "เก็บจัดโต๊ะเรียนให้เป็นระเบียบ", rank: "C" },
+            { title: "ทำโจทย์แบบฝึกหัด 15 ข้อ", rank: "A" }
+        ];
+
+        let quests = [
+            { id: 1, title: 'ถ่ายรูปสรุปบทเรียนฟิสิกส์ 1 หน้า', rank: 'C', exp: 60, gold: 30, status: 'available', proofImg: null },
+            { id: 2, title: 'ถ่ายรูปโต๊ะอ่านหนังสือที่จัดเรียบร้อยแล้ว', rank: 'E', exp: 30, gold: 15, status: 'available', proofImg: null }
+        ];
+
+        const shopItems = [
+            { id: 1, title: '🐱 สัตว์เลี้ยง: แมวปัญญา (โบนัส EXP +15%)', cost: 200, type: 'pet', petKey: 'cat' },
+            { id: 2, title: '🐉 สัตว์เลี้ยง: มังกรทอง (โบนัส Gold +20%)', cost: 350, type: 'pet', petKey: 'dragon' },
+            { id: 3, title: '☕ กาแฟ/เครื่องดื่มโปรด 1 แก้ว', cost: 100, type: 'real' },
+            { id: 4, title: '🎬 พักดูซีรีส์/เล่นเกม 1 ตอน (45 นาที)', cost: 150, type: 'real' }
+        ];
+
+        const classData = {
+            warrior: { name: 'นักรบดารา', icon: '⚔️', cssClass: 'icon-warrior', bonus: ['astro', 'phys'] },
+            mage: { name: 'จอมเวทธาตุ', icon: '🪄', cssClass: 'icon-mage', bonus: ['chem', 'bio'] },
+            scholar: { name: 'ปราชญ์คำนวณ', icon: '📐', cssClass: 'icon-scholar', bonus: ['math'] }
+        };
+
+        const quizData = {
+            astro: [
+                { q: "ข้อ 1 ในทางวิทยาศาสตร์ 'เอกภพ' หมายถึงอะไร", options: ["ก. ระบบสุริยะทั้งหมด", "ข. เฉพาะดวงดาวที่มองเห็นจากโลก", "ค. ทุกสิ่งทุกอย่างที่มีอยู่ รวมทั้งสสาร พลังงาน อวกาศ และเวลา", "ง. เฉพาะกาแล็กซีทางช้างเผือก"], a: 2 },
+                { q: "ข้อ 2 ชาวสุเมเรียนและบาบิโลนในยุคโบราณมีแนวคิดเกี่ยวกับโลกอย่างไร", options: ["ก. โลกเป็นทรงกลมและโคจรรอบดวงอาทิตย์", "ข. โลกแบนและเป็นศูนย์กลางของเอกภพ", "ค. โลกโคจรรอบดวงจันทร์", "ง. ดวงอาทิตย์เป็นศูนย์กลางของกาแล็กซี"], a: 1 },
+                { q: "ข้อ 3 แบบจำลองเอกภพที่ให้โลกเป็นศูนย์กลาง เรียกว่าอะไร", options: ["ก. แบบจำลองดวงอาทิตย์เป็นศูนย์กลาง", "ข. แบบจำลองกาแล็กซีเป็นศูนย์กลาง", "ค. แบบจำลองโลกเป็นศูนย์กลาง", "ง. แบบจำลองเอกภพขยายตัว"], a: 2 },
+                { q: "ข้อ 4 นักปราชญ์ชาวกรีกคนใดมีบทบาทสำคัญต่อแนวคิดแบบโลกเป็นศูนย์กลาง", options: ["ก. อริสโตเติล", "ข. โคเปอร์นิคัส", "ค. เคพเลอร์", "ง. กาลิเลโอ"], a: 0 },
+                { q: "ข้อ 5 ใครเป็นผู้เสนอแบบจำลองที่ให้ 'ดวงอาทิตย์เป็นศูนย์กลาง' อย่างเป็นระบบ", options: ["ก. ปโตเลมี", "ข. โคเปอร์นิคัส", "ค. กาลิเลโอ", "ง. เคพเลอร์"], a: 1 }
+            ],
+            math: [{ q: "ถ้า 2x + 5 = 15 ค่าของ x คือเท่าใด?", options: ["x = 3", "x = 5", "x = 10", "x = 7"], a: 1 }],
+            chem: [{ q: "สัญลักษณ์ทางเคมีของทองคำ คืออะไร?", options: ["Ag", "Fe", "Au", "Cu"], a: 2 }],
+            phys: [{ q: "ตามกฎข้อที่ 2 ของนิวตัน ความสัมพันธ์ของแรงคืออะไร?", options: ["F = ma", "E = mc²", "V = IR", "P = IV"], a: 0 }],
+            bio: [{ q: "เยื่อหุ้มเซลล์ประกอบด้วยโครงสร้างหลักแบบใด?", options: ["A. Protein layer", "B. Phospholipid bilayer", "C. Cellulose wall", "D. Glycogen layer"], a: 1 }]
+        };
+
+        const achievements = [
+            { id: 'q1', title: '🎯 ก้าวแรกสู่ผู้กล้า', desc: 'ทำเควสต์สำเร็จ 1 รายการ', check: () => player.questsCompleted >= 1 },
+            { id: 'q5', title: '📜 นักล่าภารกิจ', desc: 'ทำเควสต์สำเร็จครบ 5 รายการ', check: () => player.questsCompleted >= 5 },
+            { id: 'g100', title: '💰 เริ่มสะสมความมั่งคั่ง', desc: 'สะสม Gold ถึง 100 🪙', check: () => player.gold >= 100 },
+            { id: 'l3', title: '⭐ ผู้ทรงปัญญา', desc: 'มีเลเวลถึง Lv.3', check: () => player.level >= 3 },
+            { id: 'pet1', title: '🐾 มีเพื่อนคู่ใจ', desc: 'รับสัตว์เลี้ยงผู้ช่วย 1 ตัว', check: () => player.activePet !== null }
+        ];
+
+        let currentSubTab = 'available';
+        let currentQuizList = [], currentQuizIdx = 0, currentSubject = '', userSelectedAnswers = {}, quizTimer = 60, timerInterval = null;
+        let pomoInterval = null, pomoSeconds = 1500;
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function goToTitleScreen() {
+            sound.playBtn();
+            saveGame();
+            showScreen('title-screen');
+        }
+
+        function selectClass(classKey, element) {
+            sound.playBtn();
+            document.querySelectorAll('.class-card').forEach(c => c.classList.remove('selected'));
+            element.classList.add('selected');
+            player.classKey = classKey;
+            player.className = classData[classKey].name;
+            player.avatarIcon = classData[classKey].icon;
+            document.getElementById('start-game-btn').classList.remove('hidden');
+        }
+
+        function startGame() {
+            sound.playLevelUp();
+            updatePlayerUI();
+            renderQuests();
+            renderShop();
+            renderAchievements();
+            renderTree();
+            renderBoss();
+            showScreen('main-game-screen');
+            saveGame();
+        }
+
+        function switchTab(tabId, btnElement) {
+            sound.playBtn();
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active');
+
+            if (tabId === 'profile-tab') {
+                document.getElementById('edit-player-name').value = player.name;
+                document.getElementById('edit-player-bio').value = player.bio;
+                updateAvatarUI();
+            }
+        }
+
+        function switchQuestSubTab(subTab) {
+            sound.playBtn();
+            currentSubTab = subTab;
+            document.getElementById('btn-sub-available').classList.toggle('active', subTab === 'available');
+            document.getElementById('btn-sub-myquests').classList.toggle('active', subTab === 'myquests');
+            document.getElementById('available-quests-list').classList.toggle('hidden', subTab !== 'available');
+            document.getElementById('my-quests-list').classList.toggle('hidden', subTab !== 'myquests');
+            renderQuests();
+        }
+
+        function addReward(exp, gold) {
+            if (player.activePet === 'cat') exp = Math.floor(exp * 1.15);
+            if (player.activePet === 'dragon') gold = Math.floor(gold * 1.20);
+            if (player.classKey === 'warrior') exp = Math.floor(exp * 1.10);
+            if (player.classKey === 'scholar') gold += 5;
+
+            player.exp += exp;
+            player.gold += gold;
+
+            if (player.exp >= player.nextExp) {
+                player.level++;
+                player.exp -= player.nextExp;
+                player.nextExp = Math.floor(player.nextExp * 1.5);
+                sound.playLevelUp();
+                alert(`🎉 LEVEL UP! บรรลุ เลเวล ${player.level} แล้ว!`);
+            }
+            updatePlayerUI();
+            renderAchievements();
+            saveGame();
+        }
+
+        function updateAvatarUI() {
+            const statusImg = document.getElementById('status-avatar-img');
+            const statusIcon = document.getElementById('status-avatar-icon');
+            const editImg = document.getElementById('edit-avatar-preview');
+            const editIcon = document.getElementById('edit-avatar-icon-preview');
+
+            if (player.customAvatarImg) {
+                statusImg.src = player.customAvatarImg;
+                statusImg.style.display = 'block';
+                statusIcon.style.display = 'none';
+
+                if (editImg) {
+                    editImg.src = player.customAvatarImg;
+                    editImg.style.display = 'block';
+                    editIcon.style.display = 'none';
+                }
+            } else {
+                statusImg.style.display = 'none';
+                statusIcon.style.display = 'inline';
+                statusIcon.innerText = player.avatarIcon;
+
+                if (editIcon) {
+                    editImg.style.display = 'none';
+                    editIcon.style.display = 'inline';
+                    editIcon.innerText = player.avatarIcon;
+                }
+            }
+        }
+
+        function updatePlayerUI() {
+            document.getElementById('player-name').innerText = `${player.name} (Lv. ${player.level})`;
+            document.getElementById('player-gold').innerText = player.gold;
+            document.getElementById('player-exp').innerText = player.exp;
+            document.getElementById('player-next-exp').innerText = player.nextExp;
+
+            let petText = 'ไม่มี';
+            if (player.activePet === 'cat') petText = '🐱 แมวปัญญา (+15% EXP)';
+            if (player.activePet === 'dragon') petText = '🐉 มังกรทอง (+20% Gold)';
+            document.getElementById('player-pet-info').innerText = `สัตว์เลี้ยง: ${petText}`;
+
+            updateAvatarUI();
+
+            const fillPct = Math.min(100, (player.exp / player.nextExp) * 100);
+            document.getElementById('exp-bar-fill').style.width = `${fillPct}%`;
+
+            const acceptedCount = quests.filter(q => q.status === 'accepted').length;
+            document.getElementById('my-quest-count').innerText = acceptedCount;
+        }
+
+        /* --- Profile Edit System --- */
+        function uploadCustomAvatar(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    player.customAvatarImg = e.target.result;
+                    updateAvatarUI();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function setPresetAvatarIcon(icon) {
+            sound.playBtn();
+            player.customAvatarImg = null;
+            player.avatarIcon = icon;
+            updateAvatarUI();
+        }
+
+        function saveProfileChanges() {
+            sound.playSuccess();
+            const newName = document.getElementById('edit-player-name').value.trim();
+            const newBio = document.getElementById('edit-player-bio').value.trim();
+
+            if (newName) player.name = newName;
+            if (newBio) player.bio = newBio;
+
+            updatePlayerUI();
+            saveGame();
+            alert("💾 บันทึกข้อมูลโปรไฟล์สำเร็จเรียบร้อยแล้ว!");
+        }
+
+        /* --- Quests System --- */
+        function renderQuests() {
+            const availList = document.getElementById('available-quests-list');
+            const myQuestList = document.getElementById('my-quests-list');
+            
+            availList.innerHTML = '';
+            myQuestList.innerHTML = '';
+
+            quests.forEach(q => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+
+                if (q.status === 'available') {
+                    card.innerHTML = `
+                        <div class="item-row">
+                            <div>
+                                <span class="rank-badge rank-${q.rank}">Rank ${q.rank}</span>
+                                <span class="item-title">${q.title}</span>
+                            </div>
+                            <button class="stardew-btn" style="margin:0;" onclick="acceptQuest(${q.id})">➕ รับเควสต์</button>
+                        </div>
+                        <div style="color: var(--accent-green); font-size: 8px;">+${q.exp} EXP | +${q.gold} Gold</div>
+                    `;
+                    availList.appendChild(card);
+                } 
+                else if (q.status === 'accepted') {
+                    card.innerHTML = `
+                        <div class="item-row">
+                            <div>
+                                <span class="rank-badge rank-${q.rank}">Rank ${q.rank}</span>
+                                <span class="item-title">${q.title}</span>
+                            </div>
+                            <span style="font-size: 8px; color: var(--accent-yellow);">กำลังดำเนินการ...</span>
+                        </div>
+                        <div style="color: var(--accent-green); font-size: 8px;">+${q.exp} EXP | +${q.gold} Gold</div>
+                        <div style="border-top: 1px dashed #444; padding-top: 8px; margin-top: 5px;">
+                            <label style="font-size: 8px; color: #bdc3c7; display: block; margin-bottom: 5px;">📸 แนบรูปถ่ายผลงานเพื่อส่งเควสต์:</label>
+                            <input type="file" id="file-input-${q.id}" accept="image/*" class="pixel-input" style="font-size: 7px; width: 100%;">
+                            <button class="stardew-btn" style="margin-top: 8px; width: 100%; background-color: #2ecc71; border-color: #27ae60; color: #fff;" onclick="submitQuestWithImage(${q.id})">ส่งผลงานเควสต์ 🚀</button>
+                        </div>
+                    `;
+                    myQuestList.appendChild(card);
+                }
+                else if (q.status === 'completed') {
+                    card.innerHTML = `
+                        <div class="item-row">
+                            <div>
+                                <span class="rank-badge rank-${q.rank}">Rank ${q.rank}</span>
+                                <span class="item-title" style="text-decoration: line-through;">${q.title}</span>
+                            </div>
+                            <span style="font-size: 8px; color: var(--accent-green);">✓ สำเร็จแล้ว</span>
+                        </div>
+                        ${q.proofImg ? `<img src="${q.proofImg}" class="uploaded-img-preview" alt="ภาพผลงาน">` : ''}
+                    `;
+                    myQuestList.appendChild(card);
+                }
+            });
+        }
+
+        function addCustomQuest() {
+            const input = document.getElementById('quest-input');
+            const rankSelect = document.getElementById('quest-rank-select');
+            if (!input.value.trim()) return;
+            sound.playBtn();
+
+            const rank = rankSelect.value;
+            const rewards = rankMultipliers[rank];
+
+            quests.push({
+                id: Date.now(),
+                title: input.value.trim(),
+                rank: rank,
+                exp: rewards.exp,
+                gold: rewards.gold,
+                status: 'available',
+                proofImg: null
+            });
+            input.value = '';
+            renderQuests();
+            saveGame();
+        }
+
+        function getRandomQuest() {
+            sound.playBtn();
+            const randomItem = randomQuestPool[Math.floor(Math.random() * randomQuestPool.length)];
+            const rewards = rankMultipliers[randomItem.rank];
+            
+            quests.push({
+                id: Date.now(),
+                title: `[สุ่ม] ${randomItem.title}`,
+                rank: randomItem.rank,
+                exp: rewards.exp,
+                gold: rewards.gold,
+                status: 'available',
+                proofImg: null
+            });
+            renderQuests();
+            saveGame();
+        }
+
+        function acceptQuest(id) {
+            sound.playBtn();
+            const q = quests.find(item => item.id === id);
+            if (q) {
+                q.status = 'accepted';
+                updatePlayerUI();
+                renderQuests();
+                alert(`🎯 รับเควสต์ "${q.title}" แล้ว! แนบรูปส่งงานได้ในเมนู "เควสต์ของฉัน"`);
+            }
+        }
+
+        function submitQuestWithImage(id) {
+            const fileInput = document.getElementById(`file-input-${id}`);
+            const q = quests.find(item => item.id === id);
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                sound.playBtn();
+                alert("⚠️ กรุณาเลือกแนบรูปถ่ายผลงานก่อนกดส่งเควสต์ครับ!");
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                q.proofImg = e.target.result;
+                q.status = 'completed';
+                player.questsCompleted++;
+                
+                const isCritical = Math.random() < 0.2;
+                let earnedExp = q.exp;
+                let earnedGold = q.gold;
+
+                if (isCritical) {
+                    earnedExp *= 2;
+                    earnedGold *= 2;
+                    sound.playCritical();
+                    alert(`💥 CRITICAL COMPLETE! โชคดีมาก! รับรางวัลคูณ 2 เท่า!\n(+${earnedExp} EXP / +${earnedGold} Gold)`);
+                } else {
+                    sound.playSuccess();
+                    alert(`🎉 ส่งผลงานสำเร็จ! ได้รับ +${earnedExp} EXP และ +${earnedGold} Gold!`);
+                }
+
+                addReward(earnedExp, earnedGold);
+                renderQuests();
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function claimDailyReward() {
+            sound.playSuccess();
+            addReward(50, 50);
+            alert("📅 เช็กอินรายวันสำเร็จ! รับ +50 EXP และ +50 Gold ฟรี!");
+        }
+
+        /* --- ⏱️ Pomodoro Timer System --- */
+        function startPomodoro() {
+            sound.playBtn();
+            if (pomoInterval) return;
+            pomoInterval = setInterval(() => {
+                pomoSeconds--;
+                let m = Math.floor(pomoSeconds / 60);
+                let s = pomoSeconds % 60;
+                document.getElementById('pomo-display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+                
+                if (pomoSeconds <= 0) {
+                    clearInterval(pomoInterval);
+                    pomoInterval = null;
+                    pomoSeconds = 1500;
+                    sound.playLevelUp();
+                    alert("🎉 ครบเวลาอ่านหนังสือ 25 นาทีแล้ว! รับ +100 EXP และ +50 Gold!");
+                    addReward(100, 50);
+                }
+            }, 1000);
+        }
+
+        function stopPomodoro() {
+            sound.playBtn();
+            clearInterval(pomoInterval);
+            pomoInterval = null;
+            pomoSeconds = 1500;
+            document.getElementById('pomo-display').innerText = "25:00";
+        }
+
+        /* --- 🐲 Boss Dungeon System --- */
+        function renderBoss() {
+            document.getElementById('boss-hp-text').innerText = player.bossHp;
+            const pct = Math.max(0, (player.bossHp / 500) * 100);
+            document.getElementById('boss-hp-fill').style.width = `${pct}%`;
+        }
+
+        function attackBoss() {
+            if (player.bossHp <= 0) {
+                alert("🎉 บอสถูกล้มเรียบร้อยแล้ว!");
+                return;
+            }
+            startQuiz('astro');
+        }
+
+        /* --- 🌳 Tree of Wisdom System --- */
+        function renderTree() {
+            const stages = ['🌱', '🌿', '🪴', '🌳', '🍎'];
+            document.getElementById('tree-icon').innerText = stages[Math.min(player.treeLevel - 1, 4)];
+            document.getElementById('tree-level').innerText = player.treeLevel;
+        }
+
+        function waterTree() {
+            if (player.gold < 20) {
+                sound.playWrong();
+                alert("❌ Gold ไม่เพียงพอ! (ต้องการ 20 Gold)");
+                return;
+            }
+            sound.playSuccess();
+            player.gold -= 20;
+            player.treeLevel++;
+            if (player.treeLevel > 5) {
+                player.treeLevel = 1;
+                alert("🍎 ต้นไม้โตเต็มที่แล้ว! คุณได้รับผลไม้มังกรโบนัส +300 Gold!");
+                addReward(0, 300);
+            } else {
+                alert(`💧 รดน้ำต้นไม้เรียบร้อย! ระดับเติบโตขึ้นเป็น Lv. ${player.treeLevel}`);
+            }
+            updatePlayerUI();
+            renderTree();
+            saveGame();
+        }
+
+        /* --- 🏆 Achievements System --- */
+        function renderAchievements() {
+            const listEl = document.getElementById('achievements-list');
+            listEl.innerHTML = '';
+            achievements.forEach(a => {
+                const unlocked = a.check();
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.style.opacity = unlocked ? '1' : '0.5';
+                card.innerHTML = `
+                    <div class="item-row">
+                        <div>
+                            <div class="item-title">${a.title} ${unlocked ? '🏆 (สำเร็จ)' : '🔒 (ล็อค)'}</div>
+                            <div style="font-size: 7px; color: #bdc3c7;">${a.desc}</div>
+                        </div>
+                    </div>
+                `;
+                listEl.appendChild(card);
+            });
+        }
+
+        /* --- Shop & Pet System --- */
+        function renderShop() {
+            const shopEl = document.getElementById('shop-list');
+            shopEl.innerHTML = '';
+            shopItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.innerHTML = `
+                    <div class="item-row">
+                        <div>
+                            <div class="item-title">${item.title}</div>
+                            <div style="color: var(--accent-yellow); font-size: 8px;">ราคา: ${item.cost} Gold</div>
+                        </div>
+                        <button class="stardew-btn" style="font-size: 8px; margin:0;" onclick="buyItem(${item.id})">ซื้อรางวัล</button>
+                    </div>
+                `;
+                shopEl.appendChild(card);
+            });
+        }
+
+        function buyItem(itemId) {
+            const item = shopItems.find(i => i.id === itemId);
+            if (!item) return;
+
+            if (player.gold >= item.cost) {
+                player.gold -= item.cost;
+                sound.playSuccess();
+                
+                if (item.type === 'pet') {
+                    player.activePet = item.petKey;
+                    alert(`🎉 ยินดีด้วย! คุณได้รับสัตว์เลี้ยงผู้ช่วย "${item.title}"`);
+                } else {
+                    alert(`🎁 คุณได้ทำการแลกรางวัล: "${item.title}"`);
+                }
+                
+                updatePlayerUI();
+                renderAchievements();
+                saveGame();
+            } else {
+                sound.playWrong();
+                alert("❌ Gold ไม่เพียงพอ!");
+            }
+        }
+
+        /* --- Quiz System --- */
+        function startQuiz(subjectKey) {
+            sound.playBtn();
+            currentSubject = subjectKey;
+            currentQuizList = quizData[subjectKey];
+            currentQuizIdx = 0;
+            userSelectedAnswers = {};
+            document.getElementById('quiz-select-view').classList.add('hidden');
+            document.getElementById('quiz-play-view').classList.remove('hidden');
+            loadQuizQuestion();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            quizTimer = player.classKey === 'mage' ? 75 : 60;
+            document.getElementById('quiz-timer').innerText = quizTimer;
+            timerInterval = setInterval(() => {
+                quizTimer--;
+                document.getElementById('quiz-timer').innerText = quizTimer;
+                if (quizTimer <= 0) {
+                    clearInterval(timerInterval);
+                    sound.playWrong();
+                    alert("⏰ หมดเวลาในข้อนี้!");
+                    nextQuestion();
+                }
+            }, 1000);
+        }
+
+        function loadQuizQuestion() {
+            startTimer();
+            const q = currentQuizList[currentQuizIdx];
+            document.getElementById('quiz-subject-title').innerText = currentSubject.toUpperCase();
+            document.getElementById('quiz-progress').innerText = `${currentQuizIdx + 1}/${currentQuizList.length}`;
+            document.getElementById('quiz-question-text').innerText = q.q;
+
+            const optsContainer = document.getElementById('quiz-options-container');
+            optsContainer.innerHTML = '';
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-option';
+                if (userSelectedAnswers[currentQuizIdx] === idx) btn.classList.add('selected');
+                btn.innerText = opt;
+                btn.onclick = () => selectQuizOption(idx);
+                optsContainer.appendChild(btn);
+            });
+
+            document.getElementById('btn-quiz-prev').style.display = currentQuizIdx === 0 ? 'none' : 'inline-block';
+            document.getElementById('btn-quiz-next').innerText = (currentQuizIdx === currentQuizList.length - 1) ? 'ส่งข้อสอบ 🏆' : 'ถัดไป ➡️';
+        }
+
+        function selectQuizOption(chosenIdx) {
+            sound.playBtn();
+            userSelectedAnswers[currentQuizIdx] = chosenIdx;
+            loadQuizQuestion();
+        }
+
+        function nextQuestion() {
+            const q = currentQuizList[currentQuizIdx];
+            const chosenIdx = userSelectedAnswers[currentQuizIdx];
+
+            if (chosenIdx !== undefined && chosenIdx === q.a) {
+                sound.playSuccess();
+                let earnedExp = 50, earnedGold = 25;
+                if (classData[player.classKey].bonus.includes(currentSubject)) {
+                    earnedExp = Math.floor(earnedExp * 1.5);
+                    earnedGold = Math.floor(earnedGold * 1.5);
+                }
+                addReward(earnedExp, earnedGold);
+
+                if (player.bossHp > 0) {
+                    player.bossHp = Math.max(0, player.bossHp - 100);
+                    renderBoss();
+                    if (player.bossHp === 0) {
+                        alert("💥 🐉 คุณล้มบอสสำเร็จแล้ว! ได้รับรางวัลพิเศษ +500 Gold!");
+                        addReward(0, 500);
+                    }
+                }
+            }
+
+            if (currentQuizIdx < currentQuizList.length - 1) {
+                currentQuizIdx++;
+                loadQuizQuestion();
+            } else {
+                clearInterval(timerInterval);
+                alert("🏆 ยินดีด้วย! คุณทำแบบทดสอบเรียบร้อยแล้ว");
+                exitQuiz();
+            }
+        }
+
+        function prevQuestion() {
+            sound.playBtn();
+            if (currentQuizIdx > 0) {
+                currentQuizIdx--;
+                loadQuizQuestion();
+            }
+        }
+
+        function exitQuiz() {
+            sound.playBtn();
+            clearInterval(timerInterval);
+            document.getElementById('quiz-select-view').classList.remove('hidden');
+            document.getElementById('quiz-play-view').classList.add('hidden');
+        }
+
+        /* --- Save / Load / Reset --- */
+        function saveGame() {
+            localStorage.setItem('pixel_quest_save_vult', JSON.stringify({ player, quests }));
+        }
+
+        function loadSavedGame() {
+            const data = localStorage.getItem('pixel_quest_save_vult');
+            if (data) {
+                sound.playSuccess();
+                const parsed = JSON.parse(data);
+                player = parsed.player;
+                quests = parsed.quests || quests;
+                updatePlayerUI();
+                renderQuests();
+                renderShop();
+                renderAchievements();
+                renderTree();
+                renderBoss();
+                showScreen('main-game-screen');
+            } else {
+                sound.playWrong();
+                alert('ไม่พบข้อมูลเซฟ กรุณากด "เริ่มเกมใหม่"');
+            }
+        }
+
+        function resetGame() {
+            if (confirm("⚠️ ต้องการลบข้อมูลเซฟทั้งหมดและเริ่มใหม่หรือไม่?")) {
+                localStorage.removeItem('pixel_quest_save_vult');
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
