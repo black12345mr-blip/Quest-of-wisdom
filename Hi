@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quest of Wisdom v2.0</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a2e;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .profile-card {
+            background: #16213e;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            width: 320px;
+            text-align: center;
+            border: 2px solid #0f3460;
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 15px;
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #e94560;
+            background-color: #0f3460;
+        }
+
+        .preset-avatars {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .preset-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            font-size: 20px;
+            background: #0f3460;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preset-btn:hover {
+            border-color: #e94560;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .upload-btn {
+            background-color: #0f3460;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-block;
+            margin-bottom: 15px;
+            border: 1px solid #e94560;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+            text-align: left;
+        }
+
+        .input-group label {
+            font-size: 12px;
+            color: #a2a2a2;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #0f3460;
+            background: #0f3460;
+            color: white;
+            box-sizing: border-box;
+        }
+
+        .save-btn {
+            width: 100%;
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .save-btn:hover {
+            background-color: #ff6b81;
+        }
+    </style>
+</head>
+<body>
+
+<div class="profile-card">
+    <h2>Quest of Wisdom</h2>
+    <p style="font-size: 12px; color: #e94560;">Version 2.0 - Profile System</p>
+    
+    <!-- รูปโปรไฟล์ -->
+    <div class="avatar-container">
+        <img id="profile-img" class="avatar-img" src="https://api.dicebear.com/7.x/bottts/svg?seed=Quest" alt="Avatar">
+    </div>
+
+    <!-- ปุ่มเลือกรูปไอคอนสำเร็จรูป -->
+    <div class="preset-avatars">
+        <button class="preset-btn" onclick="setPreset('https://api.dicebear.com/7.x/bottts/svg?seed=Wizard')">🧙‍♂️</button>
+        <button class="preset-btn" onclick="setPreset('https://api.dicebear.com/7.x/bottts/svg?seed=Knight')">⚔️</button>
+        <button class="preset-btn" onclick="setPreset('https://api.dicebear.com/7.x/bottts/svg?seed=Dragon')">🐉</button>
+    </div>
+
+    <!-- อัปโหลดรูปเอง -->
+    <label class="upload-btn" for="file-input">📷 อัปโหลดรูปภาพ</label>
+    <input type="file" id="file-input" accept="image/*" onchange="previewImage(event)">
+
+    <!-- ฟอร์มกรอกข้อมูล -->
+    <div class="input-group">
+        <label>ชื่อผู้เล่น:</label>
+        <input type="text" id="username" placeholder="ตั้งชื่อของคุณ...">
+    </div>
+
+    <div class="input-group">
+        <label>คติประจำใจ / Bio:</label>
+        <textarea id="bio" rows="2" placeholder="เพิ่มข้อความแนะนำตัว..."></textarea>
+    </div>
+
+    <button class="save-btn" onclick="saveProfile()">💾 บันทึกโปรไฟล์</button>
+</div>
+
+<script>
+    // โหลดข้อมูลเก่าที่เคยเซฟไว้
+    window.onload = function() {
+        if(localStorage.getItem('savedName')) {
+            document.getElementById('username').value = localStorage.getItem('savedName');
+        }
+        if(localStorage.getItem('savedBio')) {
+            document.getElementById('bio').value = localStorage.getItem('savedBio');
+        }
+        if(localStorage.getItem('savedAvatar')) {
+            document.getElementById('profile-img').src = localStorage.getItem('savedAvatar');
+        }
+    };
+
+    // แสดงรูปจากที่กดเลือกไอคอน
+    function setPreset(url) {
+        document.getElementById('profile-img').src = url;
+    }
+
+    // แสดงรูปตัวอย่างตอนเลือกไฟล์ภาพจาก iPad
+    function previewImage(event) {
+        const reader = new FileReader();
+        reader.onload = function() {
+            document.getElementById('profile-img').src = reader.result;
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    }
+
+    // บันทึกข้อมูลลงในเครื่อง iPad (ปิดเว็บแล้วเปิดใหม่ ข้อมูลไม่หาย)
+    function saveProfile() {
+        const name = document.getElementById('username').value;
+        const bio = document.getElementById('bio').value;
+        const avatar = document.getElementById('profile-img').src;
+
+        localStorage.setItem('savedName', name);
+        localStorage.setItem('savedBio', bio);
+        localStorage.setItem('savedAvatar', avatar);
+
+        alert('บันทึกโปรไฟล์เรียบร้อยแล้ว!');
+    }
+</script>
+
+</body>
+</html>
